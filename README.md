@@ -14,8 +14,29 @@
       background: #fafafa;
       text-align: center;
     }
-    h2,h3 { margin: 10px 0; }
-    #levelMenu, #partMenu, #quizArea, #finalResultArea { display: none; }
+
+    h2, h3 {
+      margin: 10px 0;
+    }
+
+    button, select {
+      font-family: inherit;
+      font-size: 18px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1976D2;
+    }
+
     .optionBtn {
       display: block;
       width: 80%;
@@ -25,9 +46,14 @@
       border: 2px solid #666;
       border-radius: 6px;
       background: white;
+      color: black;
       cursor: pointer;
     }
-    .optionBtn:hover { background: #eee; }
+
+    .optionBtn:hover {
+      background: #eee;
+    }
+
     #kanjiBox {
       font-size: 160px;
       border: 2px solid #333;
@@ -35,26 +61,49 @@
       padding: 10px;
       user-select: none;
     }
+
     #scoreBox {
       font-size: 20px;
       margin-bottom: 10px;
       font-weight: bold;
     }
+
     #resultMsg {
       font-size: 22px;
       font-weight: bold;
       margin-top: 15px;
       min-height: 30px;
     }
-    #restartBtn {
-      margin-top: 20px;
-      padding: 10px 20px;
+
+    select {
+      appearance: auto;
+      padding: 10px;
       font-size: 18px;
-      background: #2196F3;
-      color: white;
-      border: none;
+      border: 2px solid #666;
       border-radius: 6px;
+      background-color: white;
+      width: 60%;
+      margin-top: 10px;
       cursor: pointer;
+    }
+
+    #levelMenu, #partMenu, #quizArea, #finalResultArea {
+      display: none;
+    }
+
+    .homeBtn {
+      margin-top: 20px;
+      background-color: #2196F3;
+      color: white;
+      padding: 8px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .homeBtn:hover {
+      background-color: #1976D2;
     }
   </style>
 </head>
@@ -83,28 +132,30 @@
     </select>
     <br><br>
     <button onclick="startQuiz()">🚀 Start Quiz</button>
+    <br><button class="homeBtn" onclick="showLevelMenu()">🏠 Home</button>
   </div>
 
-  <!-- Quiz -->
+  <!-- Quiz Area -->
   <div id="quizArea">
     <div id="scoreBox">Score: 0 / 0</div>
     <div id="kanjiBox">一</div>
     <div id="options"></div>
     <div id="resultMsg"></div>
+    <button class="homeBtn" onclick="showLevelMenu()">🏠 Home</button>
   </div>
 
   <!-- Final Result -->
   <div id="finalResultArea">
     <h3>අවසාන ප්‍රතිඵල</h3>
     <div id="finalResult"></div>
-    <button id="restartBtn" onclick="showLevelMenu()">🔄 නැවත අරඹන්න</button>
+    <button onclick="showLevelMenu()">🔄 නැවත අරඹන්න</button>
+    <br><button class="homeBtn" onclick="showLevelMenu()">🏠 Home</button>
   </div>
 
 <script>
-  // 📌 JLPT Kanji datasets
   const kanjiSets = {
-   N5: [
-  {kanji:"一", meaning:"එක"},
+    N5: [
+     {kanji:"一", meaning:"එක"},
   {kanji:"二", meaning:"දෙක"},
   {kanji:"三", meaning:"තුන"},
   {kanji:"四", meaning:"හතර"},
@@ -372,7 +423,6 @@
   {kanji:"黒", meaning:"කලු"},
   {kanji:"鳥", meaning:"කුරුල්ලා"},
   {kanji:"魚", meaning:"මාළු"}
-// 👉 N4 එකට 181 Kanji
     ],
     N3: [
   {kanji:"両", meaning:"අත් දෙක / දෙපැත්ත"},
@@ -754,11 +804,9 @@
   {kanji:"順", meaning:"අනුපිළිවෙල"},
   {kanji:"願", meaning:"ඉල්ලීම / ප්‍රාර්ථනාව"},
   {kanji:"類", meaning:"වර්ගය / කාණ්ඩය"},
-   // 👉 N3 එකට 363 Kanji
     ]
   };
 
-  // ============ Script Logic ============
   let selectedLevel = null;
   let selectedData = [];
   let currentKanji = null;
@@ -794,14 +842,16 @@
 
     const data = kanjiSets[level];
     let chunks = [];
-    for (let i=0; i<data.length; i+=10) chunks.push(data.slice(i,i+10));
+    for (let i = 0; i < data.length; i += 10) chunks.push(data.slice(i, i + 10));
 
-    chunks.forEach((p,i)=>{
-      const cb=document.createElement("input");
-      cb.type="checkbox"; cb.id="part"+i; cb.value=i;
-      const lbl=document.createElement("label");
-      lbl.htmlFor="part"+i;
-      lbl.textContent=`Part ${i+1} (Kanji ${i*10+1} – ${i*10+p.length})`;
+    chunks.forEach((p, i) => {
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = "part" + i;
+      cb.value = i;
+      const lbl = document.createElement("label");
+      lbl.htmlFor = "part" + i;
+      lbl.textContent = `Part ${i + 1} (Kanji ${i * 10 + 1} – ${i * 10 + p.length})`;
       partsDiv.appendChild(cb);
       partsDiv.appendChild(lbl);
       partsDiv.appendChild(document.createElement("br"));
@@ -809,62 +859,82 @@
   }
 
   function startQuiz() {
-    selectedData=[];
-    const data=kanjiSets[selectedLevel];
-    for(let i=0;i<data.length;i+=10){
-      const cb=document.getElementById("part"+(i/10));
-      if(cb && cb.checked) selectedData=selectedData.concat(data.slice(i,i+10));
+    selectedData = [];
+    const data = kanjiSets[selectedLevel];
+    for (let i = 0; i < data.length; i += 10) {
+      const cb = document.getElementById("part" + (i / 10));
+      if (cb && cb.checked) selectedData = selectedData.concat(data.slice(i, i + 10));
     }
-    if(selectedData.length===0){ alert("කරුණාකර කොටස් තෝරන්න!"); return; }
+    if (selectedData.length === 0) {
+      alert("කරුණාකර කොටස් තෝරන්න!");
+      return;
+    }
 
-    const qSel=document.getElementById("questionCount").value;
-    totalQuestions=(qSel==="all")?selectedData.length:parseInt(qSel);
+    const qSel = document.getElementById("questionCount").value;
+    totalQuestions = (qSel === "all") ? selectedData.length : parseInt(qSel);
 
-    score=0;attempts=0;asked=0;updateScore();
-    partMenu.style.display="none";quizArea.style.display="block";
+    score = 0; attempts = 0; asked = 0;
+    updateScore();
+    partMenu.style.display = "none";
+    quizArea.style.display = "block";
     nextKanji();
   }
 
-  function updateScore(){ scoreBox.textContent=`Score: ${score} / ${attempts}`; }
+  function updateScore() {
+    scoreBox.textContent = `Score: ${score} / ${attempts}`;
+  }
 
-  function nextKanji(){
-    if(asked>=totalQuestions){ showFinalResult(); return; }
-    resultMsg.textContent=""; optionsDiv.innerHTML="";
-    currentKanji=selectedData[Math.floor(Math.random()*selectedData.length)];
-    kanjiBox.textContent=currentKanji.kanji;
-
-    let options=[currentKanji.meaning];
-    while(options.length<4){
-      const wrong=selectedData[Math.floor(Math.random()*selectedData.length)].meaning;
-      if(!options.includes(wrong)) options.push(wrong);
+  function nextKanji() {
+    if (asked >= totalQuestions) {
+      showFinalResult();
+      return;
     }
-    options.sort(()=>Math.random()-0.5);
 
-    options.forEach(opt=>{
-      const btn=document.createElement("button");
-      btn.className="optionBtn"; btn.textContent=opt;
-      btn.onclick=()=>checkAnswer(opt);
+    resultMsg.textContent = "";
+    optionsDiv.innerHTML = "";
+
+    currentKanji = selectedData[Math.floor(Math.random() * selectedData.length)];
+    kanjiBox.textContent = currentKanji.kanji;
+
+    let options = [currentKanji.meaning];
+    while (options.length < 4) {
+      const wrong = selectedData[Math.floor(Math.random() * selectedData.length)].meaning;
+      if (!options.includes(wrong)) options.push(wrong);
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "optionBtn";
+      btn.textContent = opt;
+      btn.onclick = () => checkAnswer(opt);
       optionsDiv.appendChild(btn);
     });
+
     asked++;
   }
 
-  function checkAnswer(selected){
+  function checkAnswer(selected) {
     attempts++;
-    if(selected===currentKanji.meaning){
-      score++; resultMsg.textContent="✅ හරි!"; resultMsg.style.color="green";
-      updateScore(); setTimeout(nextKanji,1000);
+    if (selected === currentKanji.meaning) {
+      score++;
+      resultMsg.textContent = "✅ හරි!";
+      resultMsg.style.color = "green";
+      updateScore();
+      setTimeout(nextKanji, 1000);
     } else {
-      resultMsg.textContent="❌ වැරදි"; resultMsg.style.color="red";
+      resultMsg.textContent = "❌ වැරදි";
+      resultMsg.style.color = "red";
       updateScore();
     }
   }
 
-  function showFinalResult(){
-    quizArea.style.display="none"; finalResultArea.style.display="block";
-    let percent=Math.round((score/attempts)*100);
-    let grade=percent>=80?"A":percent>=60?"B":percent>=40?"C":"F";
-    finalResult.innerHTML=`✅ අවසාන ප්‍රතිඵල:<br>ඔබගේ Score: ${score} / ${attempts}<br>Percentage: ${percent}%<br>Grade: ${grade}`;
+  function showFinalResult() {
+    quizArea.style.display = "none";
+    finalResultArea.style.display = "block";
+    let percent = Math.round((score / attempts) * 100);
+    let grade = percent >= 80 ? "A" : percent >= 60 ? "B" : percent >= 40 ? "C" : "F";
+    finalResult.innerHTML = `✅ අවසාන ප්‍රතිඵල:<br>ඔබගේ Score: ${score} / ${attempts}<br>Percentage: ${percent}%<br>Grade: ${grade}`;
   }
 </script>
 
